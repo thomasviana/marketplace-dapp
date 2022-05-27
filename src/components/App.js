@@ -48,8 +48,16 @@ class App extends Component {
       );
       this.setState({ marketplace });
       const productCount = await marketplace.methods.productCount().call();
+      this.setState({ productCount });
+
+      // Load products
+      for (let i = 0; i < productCount; i++) {
+        const product = await marketplace.methods.products(i).call();
+        this.setState({ products: [...this.state.products, product] });
+      }
       console.log(productCount.toString());
       this.setState({ loading: false });
+      console.log(this.state.products);
     } else {
       window.alert("Marketplace contract not deployed to detected network");
     }
@@ -89,7 +97,10 @@ class App extends Component {
                   <p className="text-center">Loading...</p>
                 </div>
               ) : (
-                <Main createProduct={this.createProduct} />
+                <Main
+                  products={this.state.products}
+                  createProduct={this.createProduct}
+                />
               )}
             </main>
           </div>
