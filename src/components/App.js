@@ -24,7 +24,6 @@ class App extends Component {
     }
     // Legacy dapp browsers...
     else if (window.web3) {
-      window.web3 = window.web3;
       console.log("Injected web3 detected.");
     }
     // Fallback to localhost; use dev console port by default...
@@ -48,6 +47,8 @@ class App extends Component {
         networkData.address
       );
       this.setState({ marketplace });
+      const productCount = await marketplace.methods.productCount().call();
+      console.log(productCount.toString());
       this.setState({ loading: false });
     } else {
       window.alert("Marketplace contract not deployed to detected network");
@@ -62,6 +63,18 @@ class App extends Component {
       products: [],
       loading: true,
     };
+
+    this.createProduct = this.createProduct.bind(this);
+  }
+
+  createProduct(name, price) {
+    this.setState({ loading: true });
+    this.state.marketplace.methods
+      .createProduct(name, price)
+      .send({ from: this.state.account })
+      .once("receipt", (receipt) => {
+        this.setState({ loading: false });
+      });
   }
 
   render() {
@@ -76,7 +89,7 @@ class App extends Component {
                   <p className="text-center">Loading...</p>
                 </div>
               ) : (
-                <Main />
+                <Main createProduct={this.createProduct} />
               )}
             </main>
           </div>
